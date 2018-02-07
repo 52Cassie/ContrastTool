@@ -61,9 +61,12 @@ CContrastToolDlg::CContrastToolDlg(CWnd* pParent /*=NULL*/)
 	, m_editOldData(_T(""))
 	, m_editResult(_T(""))
 	, m_filename(_T(""))
+	, m_xlsortxt(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
+
+
 
 void CContrastToolDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -72,6 +75,7 @@ void CContrastToolDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_OLDDATA_EDIT, m_editOldData);
 	DDX_Text(pDX, IDC_RESULT_EDIT, m_editResult);
 	DDX_Text(pDX, IDC_FILENAME_EDIT, m_filename);
+	DDX_Radio(pDX, IDC_XLS_RADIO, m_xlsortxt);
 }
 
 BEGIN_MESSAGE_MAP(CContrastToolDlg, CDialogEx)
@@ -82,6 +86,8 @@ BEGIN_MESSAGE_MAP(CContrastToolDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_OLDDATA_BUTTON, &CContrastToolDlg::OnBnClickedOlddataButton)
 	ON_BN_CLICKED(IDC_RESULT_BUTTON, &CContrastToolDlg::OnBnClickedResultButton)
 	ON_BN_CLICKED(IDC_PRODUCE_BUTTON, &CContrastToolDlg::OnBnClickedProduceButton)
+	ON_BN_CLICKED(IDC_XLS_RADIO, &CContrastToolDlg::OnBnClickedXlsRadio)
+	ON_BN_CLICKED(IDC_TXT_RADIO, &CContrastToolDlg::OnBnClickedTxtRadio)
 END_MESSAGE_MAP()
 
 
@@ -280,7 +286,10 @@ void CContrastToolDlg::OnBnClickedProduceButton()
 	strcat_s(execmd, result);
 	strcat_s(execmd, "/");
 	strcat_s(execmd, filename);
-	strcat_s(execmd, ".xls");
+	if(m_xlsortxt == 0)
+		strcat_s(execmd, ".xls");
+	if(m_xlsortxt == 1)
+		strcat_s(execmd, ".txt");
 	//strcat_s(execmd, ".txt");
 	//MessageBox((LPCTSTR)execmd);
 	int status = system(execmd);
@@ -350,4 +359,18 @@ void CContrastToolDlg::OnBnClickedProduceButton()
 
 	Py_Finalize();
 */
+}
+
+
+void CContrastToolDlg::OnBnClickedXlsRadio()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_xlsortxt = 0;
+}
+
+
+void CContrastToolDlg::OnBnClickedTxtRadio()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_xlsortxt = 1;
 }
