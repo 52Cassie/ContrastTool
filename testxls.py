@@ -7,6 +7,7 @@ from xlutils.copy import copy
 import math
 import string 
 import sys
+import re
 
 def read_xls_file(file):
 	data = xlrd.open_workbook(file)
@@ -49,6 +50,21 @@ def create_xls_file(result):
 		worksheet.write(1,i,row[i],style)
 	workbook.save(result)
 
+def create_txt_file(result):
+	f = open(result,'w')
+	row = "针点表,x,y,总表,x,y,是否发生变化\n"
+	f.write(row)
+	f.close()
+
+def write_txt_file(result,row):
+	f = open(result,'a+')
+	s = ""
+	for i in xrange(len(row)-2):
+		s = s + row[i] + ","
+	s = s + row[len(row)-1] + "\n"
+	f.write(s)
+	f.close()
+
 def write_xls_file(result,row):
 	readbook = xlrd.open_workbook(result)
 	data = readbook.sheets()[0]
@@ -62,7 +78,14 @@ def write_xls_file(result,row):
 def comparison(file_new,file_old,result):
 	data_old = read_xls_file(file_old)
 	data_new = read_xls_file(file_new)
-	create_xls_file(result)
+
+	matchObj = re.match( r'.*\.(.*)', result, re.I)
+	print matchObj.group(1)
+	if matchObj.group(1) == 'xls' :
+		create_xls_file(result)
+	elif matchObj.group(1) == 'txt' :
+		create_txt_file(result)
+
 	r_new,net_new,x_new,y_new,nrows_new = find_cols_rows(data_new)
 	r_old,net_old,x_old,y_old,nrows_old = find_cols_rows(data_old)
 	#print r_new,net_new,x_new,y_new,nrows_new
@@ -94,7 +117,11 @@ def comparison(file_new,file_old,result):
 		else :
 				s = [rowValues_new[3],str(rowValues_new[1]),str(rowValues_new[2]),'null']
 		#print s
-		write_xls_file(result,s)
+		if matchObj.group(1) == 'xls' :
+			write_xls_file(result,s)
+		elif matchObj.group(1) == 'txt' :
+			write_txt_file(result,s)
+		
 		minn = 99999
 		temp = 0
 
