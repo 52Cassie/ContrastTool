@@ -130,30 +130,42 @@ def comparison(file_new,file_old,result):
 	r_new,nrows_new,name_new = find_cols_rows(data_new)
 	r_old,nrows_old,name_old = find_cols_rows(data_old)
 	#name_new = [location,nail,x,y,net,t/b,virtual,pin/via]
-	minn = 99999
 	flag_list = [0]*nrows_old 
-	temp = 0
 	for i in xrange(r_new,nrows_new):
 		rowValues_new = data_new.row_values(i)
+		flag = 4
+		temp = 0
 		for j in xrange(r_old,nrows_old):
 			rowValues_old = data_old.row_values(j)
 			if flag_list[j]==0 and rowValues_new[name_new[4]]==rowValues_old[name_old[4]]:
-				xd = rowValues_new[name_new[2]]-rowValues_old[name_old[2]]
-				yd = rowValues_new[name_new[3]]-rowValues_old[name_old[3]]
-				d = math.sqrt(xd**2+yd**2)
-				if d < minn:
-					minn = d
-					temp = j
+				if rowValues_new[name_new[2]] == rowValues_old[name_old[2]] :
+					if rowValues_new[name_new[3]] == rowValues_old[name_old[3]] :
+						flag = 0 # no change
+						temp = j
+						break
+					else :
+						if flag > 1:
+							flag = 1 # y change
+							temp = j
+				else :
+					if rowValues_new[name_new[3]] == rowValues_old[name_old[3]] :
+						if flag > 2:
+							flag = 2 # x change
+							temp = j
+					else :
+						if flag > 3:
+							flag = 3 # x,y change
+							temp = j
 		if temp != 0:
 			rowValues_old = data_old.row_values(temp)
-			flag_list[temp] = 1 
-			if rowValues_new[name_new[2]]!=rowValues_old[name_old[2]] and rowValues_new[name_new[3]]!=rowValues_old[name_old[3]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x,y change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
-			elif rowValues_new[name_new[2]]!=rowValues_old[name_old[2]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
-			elif rowValues_new[name_new[3]]!=rowValues_old[name_old[3]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
-			else :
+			if flag == 3:
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x,y change',' ',' ',' ',str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+			elif flag == 2:
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',' ',' ',str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+			elif flag == 1:
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',' ',str(rowValues_old[name_old[2]]),' ',str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+			elif flag == 0 :
+				flag_list[temp] = 1 
 				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 		else :
 				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ']
@@ -163,16 +175,14 @@ def comparison(file_new,file_old,result):
 		elif matchObj.group(1) == 'txt' :
 			write_txt_file(result,s)
 		
-		minn = 99999
-		temp = 0
 
-# if __name__ == '__main__':
-# 	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
+if __name__ == '__main__':
+	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
 
-file_old = "/Users/mac/Desktop/test/Nail.xlsx"
-file_new = "/Users/mac/Desktop/test/data_new.xlsx"
-result = "/Users/mac/Desktop/test/jjj.xls"
-comparison(file_new,file_old,result)
+# file_old = "/Users/mac/Desktop/test/S-1_nail.xlsx"
+# file_new = "/Users/mac/Desktop/test/s-1.xlsx"
+# result = "/Users/mac/Desktop/test/jjj.xls"
+# comparison(file_new,file_old,result)
 
 # create_xls_file(result,"IN680-F(820-01365-01-07)P2 TPs_20180122(US Dry run)")
 #write_xls_file(result,['gg'])
