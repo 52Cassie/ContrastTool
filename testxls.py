@@ -61,11 +61,10 @@ def txt_to_xls_file(txtpath):
 	style = xlwt.XFStyle() 
 	font = xlwt.Font() 
 	font.name = 'Heiti SC Light'
-	font.bold = True 
 	style.font = font 
 
 	alignment = xlwt.Alignment()
-	alignment.horz = xlwt.Alignment.HORZ_CENTER 
+	alignment.horz = xlwt.Alignment.HORZ_LEFT 
 	alignment.vert = xlwt.Alignment.VERT_CENTER 
 	style.alignment = alignment
 
@@ -87,6 +86,7 @@ def txt_to_xls_file(txtpath):
 					worksheet.write_merge(0,0,7,13,values[2],style)
 					title = 1
 				else :
+					
 					for ncol in xrange(cols_num):
 						worksheet.write(nrows,ncol,values[ncol],style)
 				nrows = nrows + 1
@@ -119,6 +119,7 @@ def comparison(file_new,file_old,result):
 	merge = []
 	for (rlow,rhigh,clow,chigh) in data_new.merged_cells:
 		merge.append([rlow,clow])
+	# print data_new.merged_cells
 	title = data_new.cell_value(merge[0][0],merge[0][1])
 
 	matchObj = re.match( r'.*\.(.*)', result, re.I)
@@ -161,19 +162,19 @@ def comparison(file_new,file_old,result):
 		if temp != 0:
 			rowValues_old = data_old.row_values(temp)
 			if flag == 3:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x,y change',' ',' ',' ',str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x y change',' ',' 无匹配',' 无匹配',str(rowValues_old[name_old[4]])]
 			elif flag == 2:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',' ',' ',str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',' ',' 无匹配',str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]])]
 			elif flag == 1:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',' ',str(rowValues_old[name_old[2]]),' ',str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',' ',str(rowValues_old[name_old[2]]),' 无匹配',str(rowValues_old[name_old[4]])]
 			elif flag == 0 :
 				flag_list[temp] = 1 
 				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 		else :
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ']
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'无匹配']
 		#print s
 		write_txt_file(result,s)
-	print result
+	# print result
 	if matchObj.group(1) == 'xls' :
 		txt_to_xls_file(result)
 		
