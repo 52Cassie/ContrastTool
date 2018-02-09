@@ -26,31 +26,31 @@ def find_cols_rows(data):
 			if type(rowValues[j])== unicode :
 				if str.upper(str(rowValues[j].encode('utf-8')))=="LOCATION" :
 					flagname[0] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="NAIL" :
 					flagname[1] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="X" :
 					flagname[2] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="Y" :
 					flagname[3] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="NET" :
 					r = i+1
 					flagname[4] = j
-					flag = flag+2
+					flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="T/B" :
 					flagname[5] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="VIRTUAL" :
 					flagname[6] = j
-					flag = flag+1
+					# flag = flag+1
 				elif str.upper(str(rowValues[j].encode('utf-8')))=="PIN/VIA" :
 					flagname[7] = j
-					flag = flag+1
-		# if flag == 4 :
-		# 	break
+					# flag = flag+1
+		if flag == 1 :
+			break
 	return r,nrows,flagname
 
 def create_xls_file(result,title):
@@ -106,49 +106,26 @@ def write_txt_file(result,row):
 	s = ""
 	for i in xrange(len(row)-1):
 		s = s + row[i] + ","
-	s = s + row[len(row)-1] + "\n"
+	s = s + str(row[len(row)-1]) + "\n"
 	f.write(s)
 	f.close()
-
-def merge_cell(sheet):
-    rt = {}
-    if sheet.merged_cells:
-        # exists merged cell
-        for item in sheet.merged_cells:
-            for row in range(item[0], item[1]):
-                for col in range(item[2], item[3]):
-                    rt.update({(row, col): (item[0], item[2])})
-    return rt
-
-def get_merged(filename):
-    book = xlrd.open_workbook(filename)
-    sheet = book.sheets()[0]    
-    # 获取合并的单元格
-    merged = merge_cell(sheet)
-    # 获取sheet的行数（默认每一行就是一条用例）
-    rows = sheet.nrows
-    # 如果sheet为空，那么rows是0
-    if rows:
-        for row in range(rows):
-            data = sheet.row_values(row)   # 单行数据
-            for index, content in enumerate(data):
-                if merged.get((row, index)):
-                    # 这是合并后的单元格，需要重新取一次数据
-                    data[index] = sheet.cell_value(*merged.get((row, index)))
-    return data
 
 def comparison(file_new,file_old,result):
 	data_old = read_xls_file(file_old)
 	data_new = read_xls_file(file_new)
-	title = get_merged(file_new)
-	print title[0]
+	merge = []
+	for (rlow,rhigh,clow,chigh) in data_new.merged_cells:
+		merge.append([rlow,clow])
+	title = data_new.cell_value(merge[0][0],merge[0][1])
+	# title = get_merged(file_new)
+	# print title[0]
 
 	matchObj = re.match( r'.*\.(.*)', result, re.I)
 	# print matchObj.group(1)
 	if matchObj.group(1) == 'xls' :
-		create_xls_file(result,title[0])
+		create_xls_file(result,title)
 	elif matchObj.group(1) == 'txt' :
-		create_txt_file(result,title[0])
+		create_txt_file(result,title)
 
 	r_new,nrows_new,name_new = find_cols_rows(data_new)
 	r_old,nrows_old,name_old = find_cols_rows(data_old)
@@ -171,13 +148,13 @@ def comparison(file_new,file_old,result):
 			rowValues_old = data_old.row_values(temp)
 			flag_list[temp] = 1 
 			if rowValues_new[name_new[2]]!=rowValues_old[name_old[2]] and rowValues_new[name_new[3]]!=rowValues_old[name_old[3]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x,y change',str(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x,y change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			elif rowValues_new[name_new[2]]!=rowValues_old[name_old[2]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',str(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			elif rowValues_new[name_new[3]]!=rowValues_old[name_old[3]]:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',str(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			else :
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',str(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 		else :
 				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ']
 		#print s
@@ -189,13 +166,13 @@ def comparison(file_new,file_old,result):
 		minn = 99999
 		temp = 0
 
-if __name__ == '__main__':
-	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
+# if __name__ == '__main__':
+# 	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
 
-# file_old = "/Users/mac/Desktop/test/S-1_nail.xlsx"
-# file_new = "/Users/mac/Desktop/test/s-1.xlsx"
-# result = "/Users/mac/Desktop/test/jjj.txt"
-# comparison(file_new,file_old,result)
+file_old = "/Users/mac/Desktop/test/Nail.xlsx"
+file_new = "/Users/mac/Desktop/test/data_new.xlsx"
+result = "/Users/mac/Desktop/test/jjj.xls"
+comparison(file_new,file_old,result)
 
 # create_xls_file(result,"IN680-F(820-01365-01-07)P2 TPs_20180122(US Dry run)")
 #write_xls_file(result,['gg'])
