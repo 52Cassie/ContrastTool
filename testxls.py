@@ -3,11 +3,10 @@
 
 import xlrd
 import xlwt
-from xlutils.copy import copy
-import math
 import string 
 import sys
 import re
+import os
 
 def read_xls_file(file):
 	data = xlrd.open_workbook(file)
@@ -53,14 +52,13 @@ def find_cols_rows(data):
 			break
 	return r,nrows,flagname
 
-def create_xls_file(result,title):
+def txt_to_xls_file(txtpath):
+	xlspath = os.path.join(os.path.dirname(txtpath),   
+        	os.path.splitext(os.path.basename(txtpath))[0] + '.xls')
 	workbook = xlwt.Workbook(encoding = 'utf-8')
 	worksheet = workbook.add_sheet('My Workbook')
-	row0 = [title,u'变化','Nail']
-	row = ['Location','X','Y', 'Net','Virtual','Pin/Via', ' ','Nail','X','Y','Net','T/B','Virtual','Pin/Via']
-
+	
 	style = xlwt.XFStyle() 
-
 	font = xlwt.Font() 
 	font.name = 'Heiti SC Light'
 	font.bold = True 
@@ -71,31 +69,36 @@ def create_xls_file(result,title):
 	alignment.vert = xlwt.Alignment.VERT_CENTER 
 	style.alignment = alignment
 
-	worksheet.write_merge(0,0,0,5,row0[0],style) #(x1,x2,y1,y2)
-	worksheet.write(0,6,row0[1],style)
-	worksheet.write_merge(0,0,7,13,row0[2],style)
-
-	for i in xrange(len(row)):
-		worksheet.write(1,i,row[i],style)
-		worksheet.col(i).width = 256*20
-
+	BUFSIZE = 1024
+	EXCEL_ROWS = 65535
+	EXCEL_COLS = 256
+	FIELD_SEPARATOR = ','
+	title = 0
+	with open(txtpath,'r') as f:
+		nrows = 0
+		lines = f.readlines(BUFSIZE)
+		while lines:
+			for line in lines:
+				values = line.split(FIELD_SEPARATOR)
+				cols_num = EXCEL_COLS if len(values) > EXCEL_COLS else len(values)
+				if title == 0:
+					worksheet.write_merge(0,0,0,5,values[0],style) #(x1,x2,y1,y2)
+					worksheet.write(0,6,values[1],style)
+					worksheet.write_merge(0,0,7,13,values[2],style)
+					title = 1
+				else :
+					for ncol in xrange(cols_num):
+						worksheet.write(nrows,ncol,values[ncol],style)
+				nrows = nrows + 1
+			lines = f.readlines(BUFSIZE)
+	
 	tall_style = xlwt.easyxf('font:height 360;')
 	worksheet.row(0).set_style(tall_style)
-	workbook.save(result)
-
-def write_xls_file(result,row):
-	readbook = xlrd.open_workbook(result)
-	data = readbook.sheets()[0]
-	nrows = data.nrows
-	workbook = copy(readbook)
-	worksheet = workbook.get_sheet(0)
-	for i in xrange(len(row)):
-		worksheet.write(nrows,i,row[i])
-	workbook.save(result)
+	workbook.save(xlspath)
 
 def create_txt_file(result,title):
 	f = open(result,'w')
-	row0 = ["title",'变化','Nail']
+	row0 = [title,'变化','Nail']
 	row = ['Location','X','Y', 'Net','Virtual','Pin/Via', ' ','Nail','X','Y','Net','T/B','Virtual','Pin/Via']
 	write_txt_file(result,row0)
 	write_txt_file(result,row)
@@ -105,7 +108,7 @@ def write_txt_file(result,row):
 	f = open(result,'a+')
 	s = ""
 	for i in xrange(len(row)-1):
-		s = s + row[i] + ","
+		s = s + str(row[i]) + ","
 	s = s + str(row[len(row)-1]) + "\n"
 	f.write(s)
 	f.close()
@@ -117,15 +120,14 @@ def comparison(file_new,file_old,result):
 	for (rlow,rhigh,clow,chigh) in data_new.merged_cells:
 		merge.append([rlow,clow])
 	title = data_new.cell_value(merge[0][0],merge[0][1])
-	# title = get_merged(file_new)
-	# print title[0]
 
 	matchObj = re.match( r'.*\.(.*)', result, re.I)
 	# print matchObj.group(1)
 	if matchObj.group(1) == 'xls' :
-		create_xls_file(result,title)
-	elif matchObj.group(1) == 'txt' :
-		create_txt_file(result,title)
+		result = os.path.join(os.path.dirname(result),   
+        	os.path.splitext(os.path.basename(result))[0] + '.txt')
+	# print result
+	create_txt_file(result,title)
 
 	r_new,nrows_new,name_new = find_cols_rows(data_new)
 	r_old,nrows_old,name_old = find_cols_rows(data_old)
@@ -170,18 +172,18 @@ def comparison(file_new,file_old,result):
 		else :
 				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ']
 		#print s
-		if matchObj.group(1) == 'xls' :
-			write_xls_file(result,s)
-		elif matchObj.group(1) == 'txt' :
-			write_txt_file(result,s)
+		write_txt_file(result,s)
+	print result
+	if matchObj.group(1) == 'xls' :
+		txt_to_xls_file(result)
 		
 
 if __name__ == '__main__':
 	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
 
-# file_old = "/Users/mac/Desktop/test/S-1_nail.xlsx"
-# file_new = "/Users/mac/Desktop/test/s-1.xlsx"
-# result = "/Users/mac/Desktop/test/jjj.xls"
+# file_old = "/Users/mac/Desktop/test/Nail.xlsx"
+# file_new = "/Users/mac/Desktop/test/data_new.xlsx"
+# result = "/Users/mac/Desktop/test/aa.xls"
 # comparison(file_new,file_old,result)
 
 # create_xls_file(result,"IN680-F(820-01365-01-07)P2 TPs_20180122(US Dry run)")
