@@ -64,7 +64,7 @@ def txt_to_xls_file(txtpath):
 	style.font = font 
 
 	alignment = xlwt.Alignment()
-	alignment.horz = xlwt.Alignment.HORZ_LEFT 
+	alignment.horz = xlwt.Alignment.HORZ_CENTER 
 	alignment.vert = xlwt.Alignment.VERT_CENTER 
 	style.alignment = alignment
 
@@ -83,10 +83,9 @@ def txt_to_xls_file(txtpath):
 				if title == 0:
 					worksheet.write_merge(0,0,0,5,values[0],style) #(x1,x2,y1,y2)
 					worksheet.write(0,6,values[1],style)
-					worksheet.write_merge(0,0,7,13,values[2],style)
+					worksheet.write_merge(0,0,7,12,values[2],style)
 					title = 1
 				else :
-					
 					for ncol in xrange(cols_num):
 						worksheet.write(nrows,ncol,values[ncol],style)
 				nrows = nrows + 1
@@ -99,7 +98,7 @@ def txt_to_xls_file(txtpath):
 def create_txt_file(result,title):
 	f = open(result,'w')
 	row0 = [title,'变化','Nail']
-	row = ['Location','X','Y', 'Net','Virtual','Pin/Via', ' ','Nail','X','Y','Net','T/B','Virtual','Pin/Via']
+	row = ['Location','X','Y', 'Net','Virtual','Pin/Via', ' ','X','Y','Net','T/B','Virtual','Pin/Via']
 	write_txt_file(result,row0)
 	write_txt_file(result,row)
 	f.close()
@@ -113,20 +112,22 @@ def write_txt_file(result,row):
 	f.write(s)
 	f.close()
 
+def delete_txt_file(result):
+	os.remove(result)
+
 def comparison(file_new,file_old,result):
 	data_old = read_xls_file(file_old)
 	data_new = read_xls_file(file_new)
 	merge = []
 	for (rlow,rhigh,clow,chigh) in data_new.merged_cells:
 		merge.append([rlow,clow])
-	# print data_new.merged_cells
 	title = data_new.cell_value(merge[0][0],merge[0][1])
 
-	matchObj = re.match( r'.*\.(.*)', result, re.I)
+	# matchObj = re.match( r'.*\.(.*)', result, re.I)
 	# print matchObj.group(1)
-	if matchObj.group(1) == 'xls' :
-		result = os.path.join(os.path.dirname(result),   
-        	os.path.splitext(os.path.basename(result))[0] + '.txt')
+	# if matchObj.group(1) == 'xls' :
+	result = os.path.join(os.path.dirname(result),   
+    	os.path.splitext(os.path.basename(result))[0] + '.txt')
 	# print result
 	create_txt_file(result,title)
 
@@ -162,21 +163,22 @@ def comparison(file_new,file_old,result):
 		if temp != 0:
 			rowValues_old = data_old.row_values(temp)
 			if flag == 3:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x y change',' ',' 无匹配',' 无匹配',str(rowValues_old[name_old[4]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x y change',str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			elif flag == 2:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',' ',' 无匹配',str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'x change',str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			elif flag == 1:
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',' ',str(rowValues_old[name_old[2]]),' 无匹配',str(rowValues_old[name_old[4]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'y change',str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 			elif flag == 0 :
 				flag_list[temp] = 1 
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',int(rowValues_old[name_old[1]]),str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ',str(rowValues_old[name_old[2]]),str(rowValues_old[name_old[3]]),str(rowValues_old[name_old[4]]),str(rowValues_old[name_old[5]]),str(rowValues_old[name_old[6]]),str(rowValues_old[name_old[7]])]
 		else :
-				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),'无匹配']
+				s = [str(rowValues_new[name_new[0]]),str(rowValues_new[name_new[2]]),str(rowValues_new[name_new[3]]),str(rowValues_new[name_new[4]]),str(rowValues_new[name_new[6]]),str(rowValues_new[name_new[7]]),' ']
 		#print s
 		write_txt_file(result,s)
-	# print result
-	if matchObj.group(1) == 'xls' :
-		txt_to_xls_file(result)
+	print result
+	# if matchObj.group(1) == 'xls' :
+	txt_to_xls_file(result)
+	delete_txt_file(result)
 		
 
 if __name__ == '__main__':
@@ -185,6 +187,11 @@ if __name__ == '__main__':
 # file_old = "/Users/mac/Desktop/test/Nail.xlsx"
 # file_new = "/Users/mac/Desktop/test/data_new.xlsx"
 # result = "/Users/mac/Desktop/test/aa.xls"
+# comparison(file_new,file_old,result)
+
+# file_new = "C:\\Users\\soft\\Desktop\\123.xlsx"
+# file_old = "C:\\Users\\soft\\Desktop\\Nails.xls"
+# result = "C:\\Users\\soft\\Desktop\\aa.xls"
 # comparison(file_new,file_old,result)
 
 # create_xls_file(result,"IN680-F(820-01365-01-07)P2 TPs_20180122(US Dry run)")
