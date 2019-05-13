@@ -1,12 +1,14 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
 import xlrd
 import xlwt
+from xlutils.copy import copy
 import string 
 import sys
 import re
 import os
+
 
 def read_xls_file(file):
 	data = xlrd.open_workbook(file)
@@ -52,11 +54,16 @@ def find_cols_rows(data):
 			break
 	return r,nrows,flagname
 
-def txt_to_xls_file(txtpath):
+def txt_to_xls_file(txtpath,standard):
 	xlspath = os.path.join(os.path.dirname(txtpath),   
         	os.path.splitext(os.path.basename(txtpath))[0] + '.xls')
 	workbook = xlwt.Workbook(encoding = 'utf-8')
-	worksheet = workbook.add_sheet('My Workbook')
+	if standard == "TP":
+		worksheet = workbook.add_sheet('TP comparison')
+	elif standard == "NetName":
+		rb = xlrd.open_workbook(xlspath)
+		workbook = copy(rb)
+		worksheet = workbook.add_sheet('NetName comparison')
 	
 	style = xlwt.XFStyle() 
 	font = xlwt.Font() 
@@ -97,7 +104,7 @@ def txt_to_xls_file(txtpath):
 
 def create_txt_file(result,title):
 	f = open(result,'w')
-	row0 = [title,'变化','Nail']
+	row0 = [title,'change','Nail']
 	row = ['Location','X','Y', 'Net','Virtual','Pin/Via', ' ','X','Y','Net','T/B','Virtual','Pin/Via']
 	write_txt_file(result,row0)
 	write_txt_file(result,row)
@@ -115,13 +122,18 @@ def write_txt_file(result,row):
 def delete_txt_file(result):
 	os.remove(result)
 
-def comparison(file_new,file_old,result):
+def comparison(file_new,file_old,result,standard):
 	data_old = read_xls_file(file_old)
 	data_new = read_xls_file(file_new)
 	merge = []
 	for (rlow,rhigh,clow,chigh) in data_new.merged_cells:
 		merge.append([rlow,clow])
 	title = data_new.cell_value(merge[0][0],merge[0][1])
+
+	if standard == "TP":
+		stacol = 7			# comparsion TP
+	elif standard == "NetName":
+		stacol = 4			# comparsion NetName
 
 	# matchObj = re.match( r'.*\.(.*)', result, re.I)
 	# print matchObj.group(1)
@@ -140,9 +152,8 @@ def comparison(file_new,file_old,result):
 		flag = 4
 		temp = 0
 		for j in xrange(r_old,nrows_old):
-			rowValues_old = data_old.row_values(j)
-			# if flag_list[j]==0 and rowValues_new[name_new[4]]==rowValues_old[name_old[4]]:	# comparsion NetName
-			if flag_list[j]==0 and rowValues_new[name_new[7]]==rowValues_old[name_old[7]]:		# comparsion TP
+			rowValues_old = data_old.row_values(j)	
+			if flag_list[j]==0 and rowValues_new[name_new[stacol]]==rowValues_old[name_old[stacol]]:		#TP-7 col,NetName-4 col
 				if rowValues_new[name_new[2]] == rowValues_old[name_old[2]] :
 					if rowValues_new[name_new[3]] == rowValues_old[name_old[3]] :
 						flag = 0 # no change
@@ -178,12 +189,17 @@ def comparison(file_new,file_old,result):
 		write_txt_file(result,s)
 	print result
 	# if matchObj.group(1) == 'xls' :
-	txt_to_xls_file(result)
+	txt_to_xls_file(result,standard)
 	delete_txt_file(result)
+
+def ContrastTool(file_new,file_old,result):
+	comparison(file_new,file_old,result,"TP")
+	comparison(file_new,file_old,result,"NetName")
 		
 
 if __name__ == '__main__':
-	comparison(sys.argv[1],sys.argv[2],sys.argv[3])
+	ContrastTool(sys.argv[1],sys.argv[2],sys.argv[3])
+	# comparison(sys.argv[1],sys.argv[2],sys.argv[3])
 
 # file_old = "/Users/mac/Desktop/test/Nail.xlsx"
 # file_new = "/Users/mac/Desktop/test/data_new.xlsx"
@@ -193,7 +209,7 @@ if __name__ == '__main__':
 # file_new = "C:\\Users\\soft\\Desktop\\123.xlsx"
 # file_old = "C:\\Users\\soft\\Desktop\\Nails.xls"
 # result = "C:\\Users\\soft\\Desktop\\aa.xls"
-# comparison(file_new,file_old,result)
+# ContrastTool(file_new,file_old,result)
 
 # create_xls_file(result,"IN680-F(820-01365-01-07)P2 TPs_20180122(US Dry run)")
 #write_xls_file(result,['gg'])
