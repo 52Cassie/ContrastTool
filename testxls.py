@@ -141,7 +141,8 @@ def comparison(file_new,file_old,result):
 		temp = 0
 		for j in xrange(r_old,nrows_old):
 			rowValues_old = data_old.row_values(j)
-			if flag_list[j]==0 and rowValues_new[name_new[4]]==rowValues_old[name_old[4]]:
+			# if flag_list[j]==0 and rowValues_new[name_new[4]]==rowValues_old[name_old[4]]:	# comparsion NetName
+			if flag_list[j]==0 and rowValues_new[name_new[7]]==rowValues_old[name_old[7]]:		# comparsion TP
 				if rowValues_new[name_new[2]] == rowValues_old[name_old[2]] :
 					if rowValues_new[name_new[3]] == rowValues_old[name_old[3]] :
 						flag = 0 # no change
