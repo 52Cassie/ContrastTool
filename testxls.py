@@ -86,6 +86,7 @@ def txt_to_xls_file(txtpath,standard):
 		lines = f.readlines(BUFSIZE)
 		while lines:
 			for line in lines:
+				line = line.strip()
 				values = line.split(FIELD_SEPARATOR)
 				cols_num = EXCEL_COLS if len(values) > EXCEL_COLS else len(values)
 				if title == 0:
@@ -96,7 +97,7 @@ def txt_to_xls_file(txtpath,standard):
 				else :
 					for ncol in xrange(cols_num):
 						if nrows > 1 and (ncol == 1 or ncol == 2 or ncol == 7 or ncol == 8):
-							# print("values:"+values[ncol]+";rows:"+str(nrows))
+							# print("values:"+values[ncol]+";rows:"+str(nrows)+";cols:"+str(ncol))
 							worksheet.write(nrows,ncol,float(values[ncol]),style)
 						else:
 							worksheet.write(nrows,ncol,values[ncol],style)
