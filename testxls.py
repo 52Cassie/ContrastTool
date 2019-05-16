@@ -68,6 +68,7 @@ def txt_to_xls_file(txtpath,standard):
 	style = xlwt.XFStyle() 
 	font = xlwt.Font() 
 	font.name = 'Heiti SC Light'
+	# font.color_index = "0x0f"
 	style.font = font 
 
 	alignment = xlwt.Alignment()
@@ -94,7 +95,11 @@ def txt_to_xls_file(txtpath,standard):
 					title = 1
 				else :
 					for ncol in xrange(cols_num):
-						worksheet.write(nrows,ncol,values[ncol],style)
+						if nrows > 1 and (ncol == 1 or ncol == 2 or ncol == 7 or ncol == 8):
+							# print("values:"+values[ncol]+";rows:"+str(nrows))
+							worksheet.write(nrows,ncol,float(values[ncol]),style)
+						else:
+							worksheet.write(nrows,ncol,values[ncol],style)
 				nrows = nrows + 1
 			lines = f.readlines(BUFSIZE)
 	
