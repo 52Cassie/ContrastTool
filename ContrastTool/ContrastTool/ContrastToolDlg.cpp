@@ -115,6 +115,12 @@ BOOL CContrastToolDlg::OnInitDialog()
 	TCHAR defaultpath[MAX_PATH];
 	SHGetSpecialFolderPath(0, defaultpath, CSIDL_DESKTOPDIRECTORY, 0);
 	GetDlgItem(IDC_RESULT_EDIT)->SetWindowTextW(defaultpath);
+
+	CTime m_time;
+	m_time = CTime::GetCurrentTime();
+	GetDlgItem(IDC_FILENAME_EDIT)->SetWindowTextW(m_time.Format(_T("%Y-%m-%d-%H-%M-%S")));
+	//m_strDateTime = m_time.Format(_T("%Y-%m-%d %H:%M:%S %A"));   //格式化日期时间  
+
 	//MessageBox((LPCTSTR)patht);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE

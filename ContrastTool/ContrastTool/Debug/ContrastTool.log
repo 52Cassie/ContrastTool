@@ -1,2 +1,4 @@
-﻿  ContrastTool.vcxproj -> C:\Users\soft\Desktop\ContrastTool\Debug\ContrastTool.exe
+﻿  ContrastToolDlg.cpp
+c:\users\soft\desktop\contrasttool\contrasttool\contrasttooldlg.cpp(258): warning C4018: “<=”: 有符号/无符号不匹配
+  ContrastTool.vcxproj -> C:\Users\soft\Desktop\ContrastTool\Debug\ContrastTool.exe
   ContrastTool.vcxproj -> C:\Users\soft\Desktop\ContrastTool\Debug\ContrastTool.pdb (Full PDB)
